@@ -1,0 +1,13 @@
+﻿
+newmtl Material-0
+Kd 0.7 0.7 0.7 
+Ka 0.01 0.01 0.01 
+Ks 0.01 0.01 0.01 
+d 1
+
+newmtl texture
+Kd 1 0.501961 1 
+Ka 0 0 0 
+Ks 0 0 0 
+d 1
+map_Kd <SystemTexture>\images\textures\metal\cast\cast_fine.jpg
