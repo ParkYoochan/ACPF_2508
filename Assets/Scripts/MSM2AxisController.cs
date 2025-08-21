@@ -20,23 +20,30 @@ public class MSM2AxisController : MonoBehaviour
     public bool invertYaw = false;
     public bool invertPitch = false;
 
+    [Header("Start Options")]
+    public bool resetStraightOnPlay = true;   // ▶️ 재생 시 강제로 1자로 정렬
+
     float _yaw;   // 누적 각도(로컬)
     float _pitch;
 
     void Awake()
     {
-        if (!yawPivot) yawPivot = transform;              // 이 스크립트가 붙은 곳
-        if (!pitchPivot) pitchPivot = transform.GetChild(0); // 관례: 첫 자식이 Pitch
-        // 초기 각도 읽어 두기 (있다면)
-        _yaw = yawPivot.localEulerAngles.y;
-        _yaw = (_yaw > 180f) ? _yaw - 360f : _yaw;
-        _pitch = pitchPivot.localEulerAngles.x;
-        _pitch = (_pitch > 180f) ? _pitch - 360f : _pitch;
+        if (!yawPivot) yawPivot = transform;
+        if (!pitchPivot) pitchPivot = transform.GetChild(0);
+
+        if (resetStraightOnPlay)
+        {
+            // 재생하면 항상 1자로(기준자세) 시작
+            yawPivot.localRotation = Quaternion.identity;
+            pitchPivot.localRotation = Quaternion.identity;
+        }
+
+        _yaw = Angle180(yawPivot.localEulerAngles.y);
+        _pitch = Angle180(pitchPivot.localEulerAngles.x);
     }
 
     void Update()
     {
-        // 입력: A/D(좌우=Yaw), W/S(앞뒤=Pitch) — 나중에 VR로 교체
         float yawInput = (Input.GetKey(KeyCode.A) ? -1f : 0f) + (Input.GetKey(KeyCode.D) ? 1f : 0f);
         float pitchInput = (Input.GetKey(KeyCode.W) ? 1f : 0f) + (Input.GetKey(KeyCode.S) ? -1f : 0f);
 
@@ -46,9 +53,7 @@ public class MSM2AxisController : MonoBehaviour
         _yaw = Mathf.Clamp(_yaw + yawInput * yawSpeed * Time.deltaTime, yawMin, yawMax);
         _pitch = Mathf.Clamp(_pitch + pitchInput * pitchSpeed * Time.deltaTime, pitchMin, pitchMax);
 
-        // 축 정의:
-        // - Yaw : YawPivot의 로컬 Y축 회전
-        // - Pitch : PitchPivot의 로컬 X축 회전  (필요 시 아래 축 바꿔도 됨)
+        // Yaw = 로컬 Y, Pitch = 로컬 X  (축이 다르면 X↔Z 바꿔서 사용)
         var yawEuler = yawPivot.localEulerAngles;
         yawEuler.y = _yaw;
         yawPivot.localEulerAngles = yawEuler;
@@ -57,4 +62,6 @@ public class MSM2AxisController : MonoBehaviour
         pitchEuler.x = _pitch;
         pitchPivot.localEulerAngles = pitchEuler;
     }
+
+    float Angle180(float a) => (a > 180f) ? a - 360f : a;
 }
