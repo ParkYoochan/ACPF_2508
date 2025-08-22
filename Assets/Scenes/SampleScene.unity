@@ -712,7 +712,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 252596381}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1134,7 +1134,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 552396572}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -71196,9 +71196,23 @@ MonoBehaviour:
   q1Max: 90
   q2Min: 0
   q2Max: 1
+  solvePosition: 1
   iterations: 64
   step: 0.25
   stopEps: 0.001
+  hAxisY: {fileID: 1682312678}
+  hAxisZ: {fileID: 252596382}
+  hAxisX: {fileID: 552396573}
+  hAxisY_Local: {x: 0, y: 1, z: 0}
+  hAxisZ_Local: {x: 0, y: 0, z: 1}
+  hAxisX_Local: {x: 1, y: 0, z: 0}
+  hYMin: -90
+  hYMax: 90
+  hZMin: -90
+  hZMax: 90
+  hXMin: -90
+  hXMax: 90
+  driveHandleRotationFromTarget: 1
 --- !u!4 &6524749337685161879
 Transform:
   m_ObjectHideFlags: 0
