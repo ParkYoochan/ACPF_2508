@@ -1317,7 +1317,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 645494206}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.83500004, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2919,7 +2919,9 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 06369a4015a380c46b64c1db7047968a, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1074470560817098469, guid: 81793a87013e18e43ad8d24f5f11c79e, type: 3}
+    - {fileID: 9077014983437359080, guid: 81793a87013e18e43ad8d24f5f11c79e, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -87928,13 +87930,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4266363337864825343}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.11640876, y: 0.87076443, z: -0.24840635, w: 0.4080597}
-  m_LocalPosition: {x: -3.67, y: 1.37, z: 2.02}
+  m_LocalRotation: {x: 0.39551267, y: 0.5639981, z: -0.43012393, w: 0.5834976}
+  m_LocalPosition: {x: 0.307, y: 1.465, z: -0.154}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6518031333682772284}
-  m_LocalEulerAnglesHint: {x: 31.844, y: 129.782, z: 0}
+  m_LocalEulerAnglesHint: {x: 71.216, y: 80.896, z: -9.982}
 --- !u!1 &7973410070539841462
 GameObject:
   m_ObjectHideFlags: 0
@@ -88504,9 +88506,64 @@ MonoBehaviour:
   m_GameObject: {fileID: 8026361684290115192}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed62332ffd4c9e449b1189239a5c01c8, type: 3}
+  m_Script: {fileID: 11500000, guid: 22cf651785bab9c4e8a204e75c81e8c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Axis0: {fileID: 645494207}
+  m_Axis1: {fileID: 1222344005}
+  m_Axis2: {fileID: 2093733327}
+  m_H_Y: {fileID: 1682312678}
+  m_H_Z: {fileID: 252596382}
+  m_H_X: {fileID: 552396573}
+  s_Axis0: {fileID: 5465296557797764767}
+  s_Axis1: {fileID: 1867068839071421354}
+  s_Axis2: {fileID: 3195009726634353363}
+  s_AxisY: {fileID: 1060209119}
+  s_Axis3: {fileID: 2856649476151440816}
+  s_Axis4: {fileID: 8477419027456646842}
+  s_FingerL: {fileID: 4054598877901691071}
+  s_FingerR: {fileID: 6431647139596159703}
+  gripOpenDeg: 0
+  gripClosedDeg: 20
+  fingersOpposite: 1
+  lever: {fileID: 6518031333682772286}
+  leverMinDeg: 0
+  leverMaxDeg: 25
+  x0:
+    offset: 0
+    scale: -1
+    minDeg: -90
+    maxDeg: 90
+  z1:
+    offset: 0
+    scale: -1
+    minDeg: -110
+    maxDeg: 180
+  yRot:
+    offset: 0
+    scale: 1
+    minDeg: -90
+    maxDeg: 90
+  z3:
+    offset: 0
+    scale: -1
+    minDeg: -180
+    maxDeg: 180
+  x4:
+    offset: 0
+    scale: -1
+    minDeg: -180
+    maxDeg: 180
+  masterPrismDirLocal: {x: 0, y: -1, z: 0}
+  slavePrismDirLocal: {x: 0, y: -1, z: 0}
+  masterRestLocalPos: {x: 0, y: -1.29, z: 0}
+  slaveRestLocalPos: {x: 0, y: 0, z: 0}
+  scalePrismatic: 100
+  masterPrismUseWorld: 1
+  slavePrismApplyWorld: 0
+  masterRestWorldPos: {x: -9.388, y: 1.5089998, z: -4.056}
+  editorCalibratePrismNow: 0
+  drawGizmos: 0
 --- !u!33 &8031588775518008092
 MeshFilter:
   m_ObjectHideFlags: 0
