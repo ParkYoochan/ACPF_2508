@@ -151,7 +151,7 @@ Transform:
   m_GameObject: {fileID: 42618301}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.334, y: -0.174, z: 1.392}
+  m_LocalPosition: {x: -0.334, y: -0.098, z: 1.392}
   m_LocalScale: {x: 0.13819213, y: 0.040551044, z: 0.044670474}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -510,7 +510,7 @@ MonoBehaviour:
   eePosOffset: {x: 0, y: 0, z: 0}
   eeEulerOffset: {x: 0, y: 0, z: 0}
   syncAnchor: {fileID: 997127192}
-  syncDistance: 0.3
+  syncDistance: 0.1
   requirePinchToSync: 0
   autoUnsync: 0
   unsyncDistance: 0.3
@@ -521,12 +521,15 @@ MonoBehaviour:
   leverMaxDeg: 25
   pinchCloseDist: 0.02
   pinchOpenDist: 0.06
-  invertPinch: 1
+  invertPinch: 0
   synced: 0
   useVisualBones: 1
   palmBone: {fileID: 933544220}
   indexTipBone: {fileID: 310209384}
   thumbTipBone: {fileID: 1325118172}
+  alignToHandle: 1
+  gripAlign: {fileID: 267709118}
+  extraEulerAfterAlign: {x: 0, y: 0, z: 0}
   drawGizmos: 1
   gizmoColorNear: {r: 0, g: 1, b: 0.3, a: 0.2}
   gizmoColorFar: {r: 1, g: 0, b: 0, a: 0.15}
@@ -909,6 +912,37 @@ Transform:
   - {fileID: 552396573}
   m_Father: {fileID: 1682312678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &267709117
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 267709118}
+  m_Layer: 0
+  m_Name: GripAlign
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &267709118
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267709117}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 997127192}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &301778699
 GameObject:
   m_ObjectHideFlags: 0
@@ -1110,7 +1144,7 @@ Transform:
   m_GameObject: {fileID: 449302432}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.16817687, z: -0, w: 0.9857568}
-  m_LocalPosition: {x: -6.78, y: 1.1768, z: -4.407}
+  m_LocalPosition: {x: -6.78, y: 1.253, z: -4.407}
   m_LocalScale: {x: 0.043692075, y: 0.046471734, z: 0.04408225}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2219,6 +2253,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 267709118}
   - {fileID: 2048841060}
   m_Father: {fileID: 543450652188068089}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3252,8 +3287,8 @@ Transform:
   m_GameObject: {fileID: 1149471745}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.07248, y: 0.0109, z: -0.05232}
-  m_LocalScale: {x: 1, y: 0.17023268, z: 1}
+  m_LocalPosition: {x: -0.07248, y: 0.01133, z: -0.05232}
+  m_LocalScale: {x: 1, y: 0.25919628, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1473146343505627199}
@@ -103421,7 +103456,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &9140967065238557880
 GameObject:
   m_ObjectHideFlags: 0
