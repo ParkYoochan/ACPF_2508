@@ -23,7 +23,7 @@ public class MasterLeverController : MonoBehaviour
     public bool driveGripWidth = false;      // true면 레버 각도를 폭으로 변환
     public float halfWidthOpen = 0.06f;     // 레버가 풀렸을 때 한쪽 반폭(미터)
     public float halfWidthClosed = 0.01f;    // 레버가 끝까지 당겨졌을 때 반폭(미터)
-    public MasterToSlaveBridge bridge;       // 있으면 bridge.gripHalfWidth 갱신
+   
 
     // 읽기 전용 상태
     [Range(0, 1)] public float squeeze01;     // 0=풀림, 1=완전 당김
@@ -93,11 +93,5 @@ public class MasterLeverController : MonoBehaviour
         float hi = Mathf.Max(minDeg, maxDeg);
         squeeze01 = Mathf.InverseLerp(lo, hi, currentDeg);
 
-        // 선택: 브릿지에 그립 반폭 전달(슬레이브 나중에 쓸 값)
-        if (driveGripWidth && bridge != null)
-        {
-            float hw = Mathf.Lerp(halfWidthOpen, halfWidthClosed, squeeze01);
-            bridge.gripHalfWidth = hw;
-        }
     }
 }
