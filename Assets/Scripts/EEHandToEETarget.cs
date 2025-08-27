@@ -8,124 +8,172 @@ public class EEHandToEETarget : MonoBehaviour
     public enum Handed { Left, Right }
     public enum Joint { Wrist, Palm, IndexTip, ThumbTip }
 
-    [Header("XR Hands Source")]
-    public Handed handed = Handed.Right;
-    public Joint joint = Joint.Palm;      // eeTarget을 구동할 관절(보통 Palm)
+    [Header("XR Hands (fallback)")]
+    public Handed handed = Handed.Left;
+    public Joint joint = Joint.Palm;
     public bool requireTracked = true;
 
     [Header("eeTarget (IK 목표)")]
-    [Tooltip("IK_MasterMSM 이 참조하는 eeTarget")]
     public Transform eeTarget;
-    public Vector3 eePosOffset;           // 로컬 위치 보정(필요 시)
-    public Vector3 eeEulerOffset;         // 로컬 회전 보정(필요 시)
+    public Vector3 eePosOffset;
+    public Vector3 eeEulerOffset;
 
-    [Header("동기화(Sync) 트리거")]
-    [Tooltip("손잡이 그립 위치에 둔 빈 오브젝트. 손이 이 위치에 근접하면 Sync 시작")]
-    public Transform syncAnchor;
-    public float syncDistance = 0.10f;  // 근접 임계값
-    public bool requirePinchToSync = false; // 핀치 중일 때만 동기화하려면 On
-    public KeyCode syncKey = KeyCode.None;     // 키로 수동 동기화(옵션)
-    [Tooltip("동기화 해제 조건을 쓰고 싶으면 On")]
+    [Header("Sync (손잡이 근접시 연결)")]
+    public Transform syncAnchor;            // 손잡이(그립) 위치
+    [Min(0f)] public float syncDistance = 0.30f;
+    public bool requirePinchToSync = false;
     public bool autoUnsync = false;
-    public float unsyncDistance = 0.30f;
+    public float unsyncDistance = 0.35f;
 
-    [Header("손 쥠(핀치) → 레버")]
-    public float pinchCloseDist = 0.020f;   // 검지-엄지 거리 <= → 1.0
-    public float pinchOpenDist = 0.060f;   // 검지-엄지 거리 >= → 0.0
-    public MasterLeverController leverController; // 여기에 currentDeg를 직접 입력
-    public float leverMinDeg = 0f;
-    public float leverMaxDeg = 20f;
+    [Header("Follow 옵션")]
+    public bool snapOnSync = true;          // 동기화 순간 손 위치로 즉시 스냅
+    public bool followOnlyWhenSynced = true;// 동기화 전에는 eeTarget 미갱신
+
+    [Header("레버(핀치 → 각도)")]
+    public MasterLeverController leverController;
+    public float leverMinDeg = 0f;          // 손 펴짐
+    public float leverMaxDeg = 25f;         // 손 쥠
+    public float pinchCloseDist = 0.020f;   // 엄지-검지 붙음
+    public float pinchOpenDist = 0.060f;   // 엄지-검지 벌어짐
+    public bool invertPinch = true;         // true: 벌리면 0, 쥐면 1
 
     [Header("상태")]
     public bool synced;
+
+    [Header("시각 손 본을 직접 사용(권장)")]
+    public bool useVisualBones = true;      // 오프셋 없이 '보이는 손' 기준 사용
+    public Transform palmBone;              // Left Hand Tracking/L_Palm
+    public Transform indexTipBone;          // .../L_IndexTip
+    public Transform thumbTipBone;          // .../L_ThumbTip
+
+    [Header("디버그/Gizmos")]
+    public bool drawGizmos = true;
+    public Color gizmoColorNear = new Color(0f, 1f, 0.3f, 0.2f);
+    public Color gizmoColorFar = new Color(1f, 0f, 0f, 0.15f);
 
     XRHandSubsystem _hands;
 
     void OnEnable()
     {
         var loader = XRGeneralSettings.Instance?.Manager?.activeLoader;
-        if (loader != null)
-            _hands = loader.GetLoadedSubsystem<XRHandSubsystem>();
+        if (loader != null) _hands = loader.GetLoadedSubsystem<XRHandSubsystem>();
     }
 
-    void Update()
+    // 손/본이 갱신된 후 적용되도록 LateUpdate 권장
+    void LateUpdate()
     {
-        if (_hands == null || eeTarget == null) return;
+        if (eeTarget == null) return;
 
-        XRHand hand = (handed == Handed.Left) ? _hands.leftHand : _hands.rightHand;
-        if (requireTracked && !hand.isTracked) return;
+        // 1) 기준 포즈 얻기 (시각 손 본 우선)
+        Pose p;
+        if (!TryGetVisualPose(out p))
+        {
+            if (!TryGetXRHandPose(out p)) return;
+        }
 
-        // --- 동기화 트리거 ---
+        // 2) 동기화 판정
+        bool near = !syncAnchor || Vector3.Distance(p.position, syncAnchor.position) <= syncDistance;
         if (!synced)
         {
-            if (TryGetJointPose(hand, joint, out Pose p))
+            bool wantSync = near && (!requirePinchToSync || EstimatePinch01() > 0.2f);
+            if (wantSync)
             {
-                bool wantSync = false;
-
-                if (syncAnchor)
-                {
-                    float dist = Vector3.Distance(p.position, syncAnchor.position);
-                    wantSync = dist <= syncDistance;
-                }
-                if (syncKey != KeyCode.None && Input.GetKeyDown(syncKey))
-                    wantSync = true;
-
-                if (requirePinchToSync)
-                    wantSync &= (EstimatePinch01(hand) > 0.2f);
-
-                if (wantSync) synced = true;
+                synced = true;
+                if (snapOnSync) ApplyToEETarget(p);
             }
-            // 동기화 전에는 eeTarget을 절대 건드리지 않음
+
+            if (!followOnlyWhenSynced) ApplyToEETarget(p);
         }
         else
         {
-            // --- 동기화 이후: XR Hand 포즈를 eeTarget에 그대로 전달 (고정 X) ---
-            if (TryGetJointPose(hand, joint, out Pose pose))
-            {
-                eeTarget.SetPositionAndRotation(pose.position, pose.rotation);
-                eeTarget.Translate(eePosOffset, Space.Self);
-                eeTarget.Rotate(eeEulerOffset, Space.Self);
+            ApplyToEETarget(p);
 
-                if (autoUnsync)
-                {
-                    // 손이 anchor/eeTarget에서 멀어지면 해제(선택)
-                    Vector3 refPos = (syncAnchor ? syncAnchor.position : eeTarget.position);
-                    float dist = Vector3.Distance(pose.position, refPos);
-                    if (dist > unsyncDistance) synced = false;
-                }
+            if (autoUnsync && syncAnchor)
+            {
+                float d = Vector3.Distance(p.position, syncAnchor.position);
+                if (d > unsyncDistance) synced = false;
             }
         }
 
-        // --- 핀치 → 레버 currentDeg (동기화 여부와 무관) ---
+        // 3) 레버(동기화 이후에만)
         if (leverController != null && synced)
         {
-            float grip01 = EstimatePinch01(hand);
-            leverController.currentDeg = Mathf.Lerp(leverMinDeg, leverMaxDeg, grip01);
+            float pinch01 = EstimatePinch01();
+            if (invertPinch) pinch01 = 1f - pinch01;
+            leverController.currentDeg = Mathf.Lerp(leverMinDeg, leverMaxDeg, pinch01);
         }
     }
 
-    // ===== 유틸 =====
-    bool TryGetJointPose(XRHand hand, Joint j, out Pose pose)
+    void ApplyToEETarget(Pose p)
     {
+        eeTarget.SetPositionAndRotation(p.position, p.rotation);
+        eeTarget.Translate(eePosOffset, Space.Self);
+        eeTarget.Rotate(eeEulerOffset, Space.Self);
+    }
+
+    // ===== 손 포즈 취득 =====
+    bool TryGetVisualPose(out Pose p)
+    {
+        p = default;
+        if (!useVisualBones || palmBone == null) return false;
+        p = new Pose(palmBone.position, palmBone.rotation);
+        return true;
+    }
+
+    bool TryGetXRHandPose(out Pose p)
+    {
+        p = default;
+        if (_hands == null) return false;
+
+        XRHand hand = (handed == Handed.Left) ? _hands.leftHand : _hands.rightHand;
+        if (requireTracked && !hand.isTracked) return false;
+
         XRHandJointID id = XRHandJointID.Palm;
-        switch (j)
+        switch (joint)
         {
             case Joint.Wrist: id = XRHandJointID.Wrist; break;
             case Joint.Palm: id = XRHandJointID.Palm; break;
             case Joint.IndexTip: id = XRHandJointID.IndexTip; break;
             case Joint.ThumbTip: id = XRHandJointID.ThumbTip; break;
         }
-        var joint = hand.GetJoint(id);
-        if (joint.TryGetPose(out pose)) return true;
-        pose = default;
-        return false;
+
+        var j = hand.GetJoint(id);
+        if (!j.TryGetPose(out p)) return false;
+        return true;
     }
 
-    float EstimatePinch01(XRHand hand)
+    // ===== 핀치(엄지-검지 거리) → 0..1 =====
+    float EstimatePinch01()
     {
-        if (!TryGetJointPose(hand, Joint.IndexTip, out Pose a)) return 0f;
-        if (!TryGetJointPose(hand, Joint.ThumbTip, out Pose b)) return 0f;
-        float d = Vector3.Distance(a.position, b.position);
-        return Mathf.Clamp01(1f - Mathf.InverseLerp(pinchOpenDist, pinchCloseDist, d));
+        // 시각 손 본 우선
+        if (useVisualBones && indexTipBone && thumbTipBone)
+        {
+            float d = Vector3.Distance(indexTipBone.position, thumbTipBone.position);
+            return Mathf.Clamp01(1f - Mathf.InverseLerp(pinchOpenDist, pinchCloseDist, d));
+        }
+
+        // XRHands 백업 경로
+        if (_hands == null) return 0f;
+        XRHand hand = (handed == Handed.Left) ? _hands.leftHand : _hands.rightHand;
+        var a = hand.GetJoint(XRHandJointID.IndexTip);
+        var b = hand.GetJoint(XRHandJointID.ThumbTip);
+        Pose pa, pb;
+        if (!a.TryGetPose(out pa) || !b.TryGetPose(out pb)) return 0f;
+        float dist = Vector3.Distance(pa.position, pb.position);
+        return Mathf.Clamp01(1f - Mathf.InverseLerp(pinchOpenDist, pinchCloseDist, dist));
+    }
+
+    // ===== Gizmos =====
+    void OnDrawGizmosSelected()
+    {
+        if (!drawGizmos || syncAnchor == null) return;
+        // syncDistance
+        Gizmos.color = gizmoColorFar;
+        Gizmos.DrawSphere(syncAnchor.position, Mathf.Max(syncDistance, 0.001f));
+        if (synced)
+        {
+            Gizmos.color = gizmoColorNear;
+            Gizmos.DrawSphere(syncAnchor.position, Mathf.Max(syncDistance * 0.4f, 0.001f));
+        }
     }
 }
